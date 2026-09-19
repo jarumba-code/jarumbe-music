@@ -79,7 +79,8 @@ jobs:
           import os
           import psycopg
 
-          with psycopg.connect(os.environ["DATABASE_URL"]) as connection:
+          database_url = os.environ["DATABASE_URL"].replace("+psycopg", "", 1)
+          with psycopg.connect(database_url) as connection:
             with connection.cursor() as cursor:
               cursor.execute("CREATE SCHEMA IF NOT EXISTS auth")
               cursor.execute("CREATE TABLE IF NOT EXISTS auth.users (id UUID PRIMARY KEY)")
