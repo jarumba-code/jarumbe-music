@@ -1,0 +1,15 @@
+# Environment files (never commit real credentials)
+.env
+.env.*
+!.env.example
+
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.vs/
+services/*_out.txt
+
+# Virtual environments
+.venv/
+venv/

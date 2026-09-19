@@ -1,0 +1,138 @@
+name: ci
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: jarumba
+          POSTGRES_USER: jarumba
+          POSTGRES_PASSWORD: jarumba
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U jarumba -d jarumba"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      DATABASE_URL: postgresql+psycopg://jarumba:jarumba@127.0.0.1:5432/jarumba
+      REDIS_URL: redis://127.0.0.1:6379/0
+      ENVIRONMENT: test
+      SUPABASE_URL: ""
+      SUPABASE_ANON_KEY: ""
+      SUPABASE_JWT_SECRET: ""
+      JAMENDO_CLIENT_ID: test_client_id_for_ci
+      JAMENDO_CLIENT_SECRET: ci-secret
+      RATE_LIMIT_ALLOW_MEMORY_FALLBACK: "false"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        working-directory: services/api
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -r requirements-test.txt
+
+      - name: Dependency integrity check
+        working-directory: services/api
+        run: python -m pip check
+
+      - name: Python compile check
+        working-directory: services/api
+        run: |
+          python -m compileall app tests
+
+      - name: Normal test suite
+        working-directory: services/api
+        run: python -m pytest tests/unit tests/integration -q -m 'not live_rls'
+
+      - name: Migration check
+        working-directory: services/api
+        run: |
+          python - <<'PY'
+          import os
+          import psycopg
+
+          with psycopg.connect(os.environ["DATABASE_URL"]) as connection:
+            with connection.cursor() as cursor:
+              cursor.execute("CREATE SCHEMA IF NOT EXISTS auth")
+              cursor.execute("CREATE TABLE IF NOT EXISTS auth.users (id UUID PRIMARY KEY)")
+              cursor.execute("""
+                CREATE OR REPLACE FUNCTION auth.uid()
+                RETURNS UUID LANGUAGE SQL STABLE AS $$ SELECT NULL::UUID $$
+              """)
+                cursor.execute("""
+                  DO $$
+                  BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+                      CREATE ROLE anon NOLOGIN;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+                      CREATE ROLE authenticated NOLOGIN;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+                      CREATE ROLE service_role NOLOGIN;
+                    END IF;
+                  END
+                  $$
+                """)
+                connection.commit()
+          PY
+          alembic upgrade head
+          alembic current
+          alembic check
+
+      - name: Docker build
+        run: docker build -f services/api/Dockerfile -t jarumba-api:ci services/api
+
+      - name: Secret scan smoke check
+        run: |
+          python - <<'PY'
+          import re
+          import subprocess
+
+          paths = subprocess.check_output(["git", "ls-files", "-z"]).decode().split("\0")
+          assignment = re.compile(
+            r"(?im)^\s*(DATABASE_URL|REDIS_URL|SUPABASE_SERVICE_ROLE_KEY|"
+            r"GOOGLE_CLIENT_SECRET|JAMENDO_CLIENT_SECRET|SUPABASE_JWT_SECRET)\s*="
+          )
+          allowed = ("", "local-dummy-secret", "ci-secret", "test_client_id_for_ci")
+          findings = []
+          for name in filter(None, paths):
+            if name.endswith((".env.example", ".lock")):
+              continue
+            text = open(name, encoding="utf-8", errors="ignore").read()
+            for match in assignment.finditer(text):
+              value = text[match.end():].splitlines()[0].strip().strip('"\'')
+              if value and value not in allowed and not value.startswith(("postgresql+psycopg://jarumba:jarumba@", "redis://redis:")):
+                findings.append(name)
+          if findings:
+            raise SystemExit("Potential committed secret assignment in: " + ", ".join(sorted(set(findings))))
+          print("Secret scan ok")
+          PY
