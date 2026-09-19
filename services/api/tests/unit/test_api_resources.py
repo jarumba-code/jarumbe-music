@@ -56,6 +56,20 @@ class TestUnauthenticated:
 
 
 class TestProfile:
+    def test_me_returns_profile_for_authenticated_subject(self, api):
+        response = api.client.get("/api/v1/me", headers=api.headers_a)
+        assert response.status_code == 200
+        body = response.json()
+        assert body["id"] == USER_A
+        assert body["display_name"] == f"user-{USER_A[:8]}"
+
+    def test_me_requires_authentication(self, api):
+        assert api.client.get("/api/v1/me").status_code == 401
+
+    def test_me_identity_cannot_be_selected_by_url(self, api):
+        response = api.client.get(f"/api/v1/me/{USER_B}", headers=api.headers_a)
+        assert response.status_code == 404
+
     def test_get_own_profile(self, api):
         response = api.client.get("/api/v1/profile", headers=api.headers_a)
         assert response.status_code == 200

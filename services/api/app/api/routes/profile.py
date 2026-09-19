@@ -18,6 +18,11 @@ router = APIRouter()
 
 
 @router.get(
+    "/me",
+    response_model=ProfileRead,
+    dependencies=[Depends(rate_limiter("profile"))],
+)
+@router.get(
     "/profile",
     response_model=ProfileRead,
     dependencies=[Depends(rate_limiter("profile"))],
