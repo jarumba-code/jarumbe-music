@@ -150,6 +150,33 @@ class TestLicenseExtraction:
 # ---------------------------------------------------------------------------
 
 class TestSearchTracks:
+    async def test_search_uses_broad_search_parameter(self):
+        captured = {}
+
+        async def handler(request):
+            captured.update(dict(request.url.params))
+            return httpx.Response(
+                200,
+                json={
+                    "headers": {"status": "success", "code": 0},
+                    "results": [SAMPLE_TRACK_RAW],
+                },
+                request=request,
+            )
+
+        client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+        provider = JamendoProvider(client_id="test", http_client=client)
+        try:
+            tracks = await provider.search_tracks("afrobeats", limit=20, offset=0)
+        finally:
+            await client.aclose()
+
+        assert tracks[0].title == "Afrobeats Fusion"
+        assert captured["search"] == "afrobeats"
+        assert captured["limit"] == "20"
+        assert captured["offset"] == "0"
+        assert "name" not in captured
+
     async def test_search_returns_normalised_tracks(self, success_provider):
         tracks = await success_provider.search_tracks("afrobeats")
         assert len(tracks) == 2

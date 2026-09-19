@@ -126,7 +126,7 @@ class JamendoProvider(BaseProvider):
         params = {
             "client_id": self.client_id,
             "format": "json",
-            "name": query,
+            "search": query,
             "limit": min(limit, JAMENDO_MAX_LIMIT),
             "offset": offset,
         }
