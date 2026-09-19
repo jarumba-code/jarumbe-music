@@ -13,8 +13,8 @@ jobs:
         image: postgres:16-alpine
         env:
           POSTGRES_DB: jarumba
-          POSTGRES_USER: jarumba
-          POSTGRES_PASSWORD: jarumba
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
         options: >-
@@ -33,7 +33,7 @@ jobs:
           --health-retries=10
 
     env:
-      DATABASE_URL: postgresql+psycopg://jarumba:jarumba@127.0.0.1:5432/jarumba
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@127.0.0.1:5432/jarumba
       REDIS_URL: redis://127.0.0.1:6379/0
       ENVIRONMENT: test
       SUPABASE_URL: ""
