@@ -120,8 +120,8 @@ jobs:
 
           paths = subprocess.check_output(["git", "ls-files", "-z"]).decode().split("\0")
           assignment = re.compile(
-            r"(?im)^\s*(DATABASE_URL|REDIS_URL|SUPABASE_SERVICE_ROLE_KEY|"
-            r"GOOGLE_CLIENT_SECRET|JAMENDO_CLIENT_SECRET|SUPABASE_JWT_SECRET)\s*="
+            r"(?m)^[ \t]*(DATABASE_URL|REDIS_URL|SUPABASE_SERVICE_ROLE_KEY|"
+            r"GOOGLE_CLIENT_SECRET|JAMENDO_CLIENT_SECRET|SUPABASE_JWT_SECRET)[ \t]*="
           )
           allowed = ("", "local-dummy-secret", "ci-secret", "test_client_id_for_ci")
           findings = []
