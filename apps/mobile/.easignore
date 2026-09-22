@@ -1,0 +1,21 @@
+# EAS cloud build ignore list.
+# Keep cloud uploads lean: local secrets, native output, and dev artifacts
+# must never be uploaded to EAS.
+.env
+.env.*
+!.env.example
+node_modules/
+.expo/
+dist/
+web-build/
+android/
+ios/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+npm-debug.*
+yarn-debug.*
+yarn-error.*
