@@ -1,6 +1,6 @@
 {
-  "name": "mobile",
-  "version": "1.0.0",
+  "name": "jarumba-music",
+  "version": "1.0.1",
   "main": "index.ts",
   "dependencies": {
     "@expo/ngrok": "^4.1.3",
