@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Jarumba Music",
-    "slug": "jarumba-music",
+    "slug": "mobile",
     "scheme": "jarumba",
     "version": "1.0.1",
     "description": "Free, open-source music player for discovery, streaming and your own library.",
