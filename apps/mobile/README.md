@@ -26,6 +26,39 @@ npx expo start -c
 
 npx expo run:android
 
+## Branding
+
+The app name, launcher icon, adaptive icon (foreground, monochrome, brand
+background colour) and splash screen all come from `assets/branding/`; see
+`assets/branding/README.md` for the palette and safe-area rules. Regenerate the
+artwork with:
+
+```bash
+python assets/branding/tools/generate_brand_assets.py
+```
+
+## Release builds
+
+`eas.json` defines four Android profiles:
+
+| Profile | `developmentClient` | Output |
+| --- | --- | --- |
+| `development` | `true` | debug APK that opens the Expo dev launcher and dev menu |
+| `preview` | `false` | standalone release APK (same config as `release`) |
+| `release` | `false` | standalone release APK for testers |
+| `production` | `false` | standalone release APK (default profile) |
+
+Only `development` sets `developmentClient: true`; that is the flag that makes
+EAS enable the dev launcher inside the binary. Builds from every other profile
+are normal standalone apps with no dev menu, so the public APK is:
+
+```bash
+npx eas-cli build --platform android --profile release
+```
+
+`app.json` owns the Android version (`expo.version`, `expo.android.versionCode`)
+because `cli.appVersionSource` is `local`; bump both for every public APK.
+
 ## Auth
 
 Google sign-in uses the Supabase **PKCE authorization-code flow** end to end:

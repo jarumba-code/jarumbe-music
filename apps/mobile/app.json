@@ -1,33 +1,56 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "Jarumba Music",
+    "slug": "jarumba-music",
     "scheme": "jarumba",
-    "version": "1.0.0",
+    "version": "1.0.1",
+    "description": "Free, open-source music player for discovery, streaming and your own library.",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/branding/jarumba-icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "versionCode": 2,
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#06100B",
+        "foregroundImage": "./assets/branding/jarumba-adaptive-foreground.png",
+        "monochromeImage": "./assets/branding/jarumba-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.mobile"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/branding/jarumba-favicon.png"
     },
     "plugins": [
       "expo-web-browser",
       "expo-font",
       "expo-secure-store",
-      "expo-audio"
+      [
+        "expo-audio",
+        {
+          "enableBackgroundPlayback": true,
+          "enableBackgroundRecording": false,
+          "recordAudioAndroid": false,
+          "microphonePermission": false
+        }
+      ],
+      "expo-asset",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#06100B",
+          "image": "./assets/branding/jarumba-splash.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "dark": {
+            "backgroundColor": "#06100B",
+            "image": "./assets/branding/jarumba-splash.png"
+          }
+        }
+      ]
     ],
     "extra": {
       "eas": {

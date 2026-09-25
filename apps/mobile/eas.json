@@ -11,16 +11,18 @@
         "buildType": "apk"
       }
     },
-    "preview": {
+    "release": {
       "distribution": "internal",
+      "environment": "production",
       "android": {
         "buildType": "apk"
       }
     },
+    "preview": {
+      "extends": "release"
+    },
     "production": {
-      "android": {
-        "buildType": "app-bundle"
-      }
+      "extends": "release"
     }
   }
 }
