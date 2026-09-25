@@ -15,8 +15,7 @@
       "versionCode": 2,
       "adaptiveIcon": {
         "backgroundColor": "#06100B",
-        "foregroundImage": "./assets/branding/jarumba-adaptive-foreground.png",
-        "monochromeImage": "./assets/branding/jarumba-monochrome.png"
+        "foregroundImage": "./assets/branding/jarumba-adaptive-foreground.png"
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.mobile"
